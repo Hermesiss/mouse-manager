@@ -95,13 +95,10 @@ namespace MouseManager
         /// </summary>
         public bool isPaused
         {
-            get
-            {
-                return _ispaused;
-            }
+            get => _ispaused;
             set
             {
-                if (value != _ispaused && value == true)
+                if (value != _ispaused && value)
                     StopHook();
 
                 if (value != _ispaused && value == false)
@@ -110,10 +107,10 @@ namespace MouseManager
                 _ispaused = value;
             }
         }
-        bool _ispaused = false;
+        bool _ispaused;
 
         public delegate void KeyDownEventDelegate(KeyboardHookEventArgs e);
-        public KeyDownEventDelegate KeyDownEvent = delegate { };
+        public readonly KeyDownEventDelegate KeyDownEvent = delegate { };
 
         public delegate void KeyUpEventDelegate(KeyboardHookEventArgs e);
         public KeyUpEventDelegate KeyUpEvent = delegate { };
@@ -130,13 +127,13 @@ namespace MouseManager
 
         private void StartHook()
         {
-            Trace.WriteLine(string.Format("Starting hook '{0}'...", Name), string.Format("Hook.StartHook [{0}]", Thread.CurrentThread.Name));
+            Trace.WriteLine($"Starting hook '{Name}'...", string.Format("Hook.StartHook [{0}]", Thread.CurrentThread.Name));
 
             _hookproc = new HookProc(HookCallback);
             _hhook = SetWindowsHookEx(HookType.WH_MOUSE_LL, _hookproc, GetModuleHandle(Process.GetCurrentProcess().MainModule.ModuleName), 0);
             if (_hhook == null || _hhook == IntPtr.Zero)
             {
-                Win32Exception LastError = new Win32Exception(Marshal.GetLastWin32Error());
+                var lastError = new Win32Exception(Marshal.GetLastWin32Error());
             }
         }
 

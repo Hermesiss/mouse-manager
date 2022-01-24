@@ -7,9 +7,9 @@ using CommandLine;
 
 namespace MouseManager
 {
-    class Program
+    public static class Program
     {
-        private static Control _hookControl;
+        //private static Control _hookControl;
 
         private static async Task<int> Main(string[] args) {
             return await Parser.Default.ParseArguments<CommandLineOptions>(args)

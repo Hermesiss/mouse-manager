@@ -15,4 +15,11 @@
       <PackageReference Include="CommandLineParser" Version="2.9.0-preview1" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Remove="run.bat" />
+      <AdditionalFiles Include="run.bat">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </AdditionalFiles>
+    </ItemGroup>
+
 </Project>
