@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MouseManager", "MouseManager\MouseManager.csproj", "{613B8E87-491D-4CC1-901D-1C6AFD14362F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinApi", "WinApi\WinApi.csproj", "{B1FF6C90-DEED-4A82-AF75-98B4C210899B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InputHooks", "InputHooks\InputHooks.csproj", "{7AF0607D-6B5A-4193-8A85-F7F7C46AE46E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{613B8E87-491D-4CC1-901D-1C6AFD14362F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{613B8E87-491D-4CC1-901D-1C6AFD14362F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{613B8E87-491D-4CC1-901D-1C6AFD14362F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{613B8E87-491D-4CC1-901D-1C6AFD14362F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B1FF6C90-DEED-4A82-AF75-98B4C210899B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B1FF6C90-DEED-4A82-AF75-98B4C210899B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B1FF6C90-DEED-4A82-AF75-98B4C210899B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B1FF6C90-DEED-4A82-AF75-98B4C210899B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7AF0607D-6B5A-4193-8A85-F7F7C46AE46E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7AF0607D-6B5A-4193-8A85-F7F7C46AE46E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7AF0607D-6B5A-4193-8A85-F7F7C46AE46E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7AF0607D-6B5A-4193-8A85-F7F7C46AE46E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
