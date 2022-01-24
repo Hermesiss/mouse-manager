@@ -2,200 +2,154 @@
 using System.ComponentModel;
 using System.Windows.Forms;
 
-namespace InputHooks
-{
+namespace InputHooks {
     /// <summary>
     /// This component monitors all mouse activities globally (also outside of the application) 
     /// and provides appropriate events.
     /// </summary>
-    public class GlobalEventProvider : Component
-    {
+    public class GlobalEventProvider : Component {
         /// <summary>
         /// This component raises events. The value is always true.
         /// </summary>
-        protected override bool CanRaiseEvents
-        {
-            get
-            {
-                return true;
-            }
-        }
+        protected override bool CanRaiseEvents => true;
 
         //################################################################
+
         #region Mouse events
 
-        private event MouseEventHandler m_MouseMove;
+        private event MouseEventHandler MouseMoveEvt;
 
         /// <summary>
         /// Occurs when the mouse pointer is moved. 
         /// </summary>
-        public event MouseEventHandler MouseMove
-        {
-            add
-            {
-                if (m_MouseMove == null)
-                {
+        public event MouseEventHandler MouseMove {
+            add {
+                if (MouseMoveEvt == null) {
                     HookManager.MouseMove += HookManager_MouseMove;
                 }
-                m_MouseMove += value;
+
+                MouseMoveEvt += value;
             }
 
-            remove
-            {
-                m_MouseMove -= value;
-                if (m_MouseMove == null)
-                {
+            remove {
+                MouseMoveEvt -= value;
+                if (MouseMoveEvt == null) {
                     HookManager.MouseMove -= HookManager_MouseMove;
                 }
             }
         }
 
-        void HookManager_MouseMove(object sender, MouseEventArgs e)
-        {
-            if (m_MouseMove != null)
-            {
-                m_MouseMove.Invoke(this, e);
-            }
+        private void HookManager_MouseMove(object sender, MouseEventArgs e) {
+            MouseMoveEvt?.Invoke(this, e);
         }
 
-        private event MouseEventHandler m_MouseClick;
+        private event MouseEventHandler MouseClickEvt;
+
         /// <summary>
         /// Occurs when a click was performed by the mouse. 
         /// </summary>
-        public event MouseEventHandler MouseClick
-        {
-            add
-            {
-                if (m_MouseClick == null)
-                {
+        public event MouseEventHandler MouseClick {
+            add {
+                if (MouseClickEvt == null) {
                     HookManager.MouseClick += HookManager_MouseClick;
                 }
-                m_MouseClick += value;
+
+                MouseClickEvt += value;
             }
 
-            remove
-            {
-                m_MouseClick -= value;
-                if (m_MouseClick == null)
-                {
+            remove {
+                MouseClickEvt -= value;
+                if (MouseClickEvt == null) {
                     HookManager.MouseClick -= HookManager_MouseClick;
                 }
             }
         }
 
-        void HookManager_MouseClick(object sender, MouseEventArgs e)
-        {
-            if (m_MouseClick != null)
-            {
-                m_MouseClick.Invoke(this, e);
-            }
+        private void HookManager_MouseClick(object sender, MouseEventArgs e) {
+            MouseClickEvt?.Invoke(this, e);
         }
 
-        private event MouseEventHandler m_MouseDown;
+        private event MouseEventHandler MouseDownEvt;
 
         /// <summary>
         /// Occurs when the mouse a mouse button is pressed. 
         /// </summary>
-        public event MouseEventHandler MouseDown
-        {
-            add
-            {
-                if (m_MouseDown == null)
-                {
+        public event MouseEventHandler MouseDown {
+            add {
+                if (MouseDownEvt == null) {
                     HookManager.MouseDown += HookManager_MouseDown;
                 }
-                m_MouseDown += value;
+
+                MouseDownEvt += value;
             }
 
-            remove
-            {
-                m_MouseDown -= value;
-                if (m_MouseDown == null)
-                {
+            remove {
+                MouseDownEvt -= value;
+                if (MouseDownEvt == null) {
                     HookManager.MouseDown -= HookManager_MouseDown;
                 }
             }
         }
 
-        void HookManager_MouseDown(object sender, MouseEventArgs e)
-        {
-            if (m_MouseDown != null)
-            {
-                m_MouseDown.Invoke(this, e);
-            }
+        private void HookManager_MouseDown(object sender, MouseEventArgs e) {
+            MouseDownEvt?.Invoke(this, e);
         }
 
 
-        private event MouseEventHandler m_MouseUp;
+        private event MouseEventHandler MouseUpEvt;
 
         /// <summary>
         /// Occurs when a mouse button is released. 
         /// </summary>
-        public event MouseEventHandler MouseUp
-        {
-            add
-            {
-                if (m_MouseUp == null)
-                {
+        public event MouseEventHandler MouseUp {
+            add {
+                if (MouseUpEvt == null) {
                     HookManager.MouseUp += HookManager_MouseUp;
                 }
-                m_MouseUp += value;
+
+                MouseUpEvt += value;
             }
 
-            remove
-            {
-                m_MouseUp -= value;
-                if (m_MouseUp == null)
-                {
+            remove {
+                MouseUpEvt -= value;
+                if (MouseUpEvt == null) {
                     HookManager.MouseUp -= HookManager_MouseUp;
                 }
             }
         }
 
-        void HookManager_MouseUp(object sender, MouseEventArgs e)
-        {
-            if (m_MouseUp != null)
-            {
-                m_MouseUp.Invoke(this, e);
-            }
+        private void HookManager_MouseUp(object sender, MouseEventArgs e) {
+            MouseUpEvt?.Invoke(this, e);
         }
 
-        private event MouseEventHandler m_MouseDoubleClick;
+        private event MouseEventHandler MouseDoubleClickEvt;
 
         /// <summary>
         /// Occurs when a double clicked was performed by the mouse. 
         /// </summary>
-        public event MouseEventHandler MouseDoubleClick
-        {
-            add
-            {
-                if (m_MouseDoubleClick == null)
-                {
+        public event MouseEventHandler MouseDoubleClick {
+            add {
+                if (MouseDoubleClickEvt == null) {
                     HookManager.MouseDoubleClick += HookManager_MouseDoubleClick;
                 }
-                m_MouseDoubleClick += value;
+
+                MouseDoubleClickEvt += value;
             }
 
-            remove
-            {
-                m_MouseDoubleClick -= value;
-                if (m_MouseDoubleClick == null)
-                {
+            remove {
+                MouseDoubleClickEvt -= value;
+                if (MouseDoubleClickEvt == null) {
                     HookManager.MouseDoubleClick -= HookManager_MouseDoubleClick;
                 }
             }
         }
 
-        void HookManager_MouseDoubleClick(object sender, MouseEventArgs e)
-        {
-            if (m_MouseDoubleClick != null)
-            {
-                m_MouseDoubleClick.Invoke(this, e);
-            }
+        private void HookManager_MouseDoubleClick(object sender, MouseEventArgs e) {
+            MouseDoubleClickEvt?.Invoke(this, e);
         }
 
 
-        private event EventHandler<MouseEventExtArgs> m_MouseMoveExt;
+        private event EventHandler<MouseEventExtArgs> MouseMoveExtEvt;
 
         /// <summary>
         /// Occurs when the mouse pointer is moved. 
@@ -204,36 +158,28 @@ namespace InputHooks
         /// This event provides extended arguments of type <see cref="MouseEventArgs"/> enabling you to 
         /// supress further processing of mouse movement in other applications.
         /// </remarks>
-        public event EventHandler<MouseEventExtArgs> MouseMoveExt
-        {
-            add
-            {
-                if (m_MouseMoveExt == null)
-                {
+        public event EventHandler<MouseEventExtArgs> MouseMoveExt {
+            add {
+                if (MouseMoveExtEvt == null) {
                     HookManager.MouseMoveExt += HookManager_MouseMoveExt;
                 }
-                m_MouseMoveExt += value;
+
+                MouseMoveExtEvt += value;
             }
 
-            remove
-            {
-                m_MouseMoveExt -= value;
-                if (m_MouseMoveExt == null)
-                {
+            remove {
+                MouseMoveExtEvt -= value;
+                if (MouseMoveExtEvt == null) {
                     HookManager.MouseMoveExt -= HookManager_MouseMoveExt;
                 }
             }
         }
 
-        void HookManager_MouseMoveExt(object sender, MouseEventExtArgs e)
-        {
-            if (m_MouseMoveExt != null)
-            {
-                m_MouseMoveExt.Invoke(this, e);
-            }
+        private void HookManager_MouseMoveExt(object sender, MouseEventExtArgs e) {
+            MouseMoveExtEvt?.Invoke(this, e);
         }
 
-        private event EventHandler<MouseEventExtArgs> m_MouseClickExt;
+        private event EventHandler<MouseEventExtArgs> MouseClickExtEvt;
 
         /// <summary>
         /// Occurs when a click was performed by the mouse. 
@@ -242,42 +188,34 @@ namespace InputHooks
         /// This event provides extended arguments of type <see cref="MouseEventArgs"/> enabling you to 
         /// supress further processing of mouse click in other applications.
         /// </remarks>
-        public event EventHandler<MouseEventExtArgs> MouseClickExt
-        {
-            add
-            {
-                if (m_MouseClickExt == null)
-                {
+        public event EventHandler<MouseEventExtArgs> MouseClickExt {
+            add {
+                if (MouseClickExtEvt == null) {
                     HookManager.MouseClickExt += HookManager_MouseClickExt;
                 }
-                m_MouseClickExt += value;
+
+                MouseClickExtEvt += value;
             }
 
-            remove
-            {
-                m_MouseClickExt -= value;
-                if (m_MouseClickExt == null)
-                {
+            remove {
+                MouseClickExtEvt -= value;
+                if (MouseClickExtEvt == null) {
                     HookManager.MouseClickExt -= HookManager_MouseClickExt;
                 }
             }
         }
 
-        void HookManager_MouseClickExt(object sender, MouseEventExtArgs e)
-        {
-            if (m_MouseClickExt != null)
-            {
-                m_MouseClickExt.Invoke(this, e);
-            }
+        private void HookManager_MouseClickExt(object sender, MouseEventExtArgs e) {
+            MouseClickExtEvt?.Invoke(this, e);
         }
-
 
         #endregion
 
         //################################################################
+
         #region Keyboard events
 
-        private event KeyPressEventHandler m_KeyPress;
+        private event KeyPressEventHandler KeyPressEvt;
 
         /// <summary>
         /// Occurs when a key is pressed.
@@ -294,99 +232,76 @@ namespace InputHooks
         ///To handle keyboard events only in your application and not enable other applications to receive keyboard events, 
         /// set the KeyPressEventArgs.Handled property in your form's KeyPress event-handling method to <b>true</b>. 
         /// </remarks>
-        public event KeyPressEventHandler KeyPress
-        {
-            add
-            {
-                if (m_KeyPress==null)
-                {
-                    HookManager.KeyPress +=HookManager_KeyPress;
+        public event KeyPressEventHandler KeyPress {
+            add {
+                if (KeyPressEvt == null) {
+                    HookManager.KeyPress += HookManager_KeyPress;
                 }
-                m_KeyPress += value;
+
+                KeyPressEvt += value;
             }
-            remove
-            {
-                m_KeyPress -= value;
-                if (m_KeyPress == null)
-                {
+            remove {
+                KeyPressEvt -= value;
+                if (KeyPressEvt == null) {
                     HookManager.KeyPress -= HookManager_KeyPress;
                 }
             }
         }
 
-        void HookManager_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            if (m_KeyPress != null)
-            {
-                m_KeyPress.Invoke(this, e);
-            }
+        private void HookManager_KeyPress(object sender, KeyPressEventArgs e) {
+            KeyPressEvt?.Invoke(this, e);
         }
 
-        private event KeyEventHandler m_KeyUp;
+        private event KeyEventHandler KeyUpEvt;
 
         /// <summary>
         /// Occurs when a key is released. 
         /// </summary>
-        public event KeyEventHandler KeyUp
-        {
-            add
-            {
-                if (m_KeyUp == null)
-                {
+        public event KeyEventHandler KeyUp {
+            add {
+                if (KeyUpEvt == null) {
                     HookManager.KeyUp += HookManager_KeyUp;
                 }
-                m_KeyUp += value;
+
+                KeyUpEvt += value;
             }
-            remove
-            {
-                m_KeyUp -= value;
-                if (m_KeyUp == null)
-                {
+            remove {
+                KeyUpEvt -= value;
+                if (KeyUpEvt == null) {
                     HookManager.KeyUp -= HookManager_KeyUp;
                 }
             }
         }
 
-        private void HookManager_KeyUp(object sender, KeyEventArgs e)
-        {
-            if (m_KeyUp != null)
-            {
-                m_KeyUp.Invoke(this, e);
-            }
+        private void HookManager_KeyUp(object sender, KeyEventArgs e) {
+            KeyUpEvt?.Invoke(this, e);
         }
 
-        private event KeyEventHandler m_KeyDown;
+        private event KeyEventHandler KeyDownEvt;
 
         /// <summary>
-        /// Occurs when a key is preseed. 
+        /// Occurs when a key is pressed. 
         /// </summary>
-        public event KeyEventHandler KeyDown
-        {
-            add
-            {
-                if (m_KeyDown == null)
-                {
+        public event KeyEventHandler KeyDown {
+            add {
+                if (KeyDownEvt == null) {
                     HookManager.KeyDown += HookManager_KeyDown;
                 }
-                m_KeyDown += value;
+
+                KeyDownEvt += value;
             }
-            remove
-            {
-                m_KeyDown -= value;
-                if (m_KeyDown == null)
-                {
+            remove {
+                KeyDownEvt -= value;
+                if (KeyDownEvt == null) {
                     HookManager.KeyDown -= HookManager_KeyDown;
                 }
             }
         }
 
-        private void HookManager_KeyDown(object sender, KeyEventArgs e)
-        {
-            m_KeyDown.Invoke(this, e);
+        private void HookManager_KeyDown(object sender, KeyEventArgs e) {
+            KeyDownEvt?.Invoke(this, e);
         }
 
         #endregion
-
-        
     }
 }

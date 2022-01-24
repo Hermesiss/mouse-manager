@@ -1,14 +1,11 @@
 using System;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
-namespace InputHooks
-{
-    public static partial class HookManager
-    {
+namespace InputHooks {
+    public static partial class HookManager {
         /// <summary>
         /// The CallWndProc hook procedure is an application-defined or library-defined callback 
         /// function used with the SetWindowsHookEx function. The HOOKPROC type defines a pointer 
@@ -42,6 +39,7 @@ namespace InputHooks
         private delegate int HookProc(int nCode, int wParam, IntPtr lParam);
 
         //##############################################################################
+
         #region Mouse hook processing
 
         /// <summary>
@@ -50,15 +48,15 @@ namespace InputHooks
         /// When passing delegates to unmanaged code, they must be kept alive by the managed application 
         /// until it is guaranteed that they will never be called.
         /// </summary>
-        private static HookProc s_MouseDelegate;
+        private static HookProc _mouseDelegate;
 
         /// <summary>
         /// Stores the handle to the mouse hook procedure.
         /// </summary>
-        private static int s_MouseHookHandle;
+        private static int _mouseHookHandle;
 
-        private static int m_OldX;
-        private static int m_OldY;
+        private static int _mOldX;
+        private static int _mOldY;
 
         /// <summary>
         /// A callback function which will be called every Time a mouse activity detected.
@@ -85,174 +83,129 @@ namespace InputHooks
         /// procedure does not call CallNextHookEx, the return value should be zero. 
         /// </returns>
         private static int MouseHookProc(int nCode, int wParam, IntPtr lParam) {
-            var sw = new Stopwatch();
-            sw.Start();
-            if (nCode >= 0)
-            {
-                //Marshall the data from callback.
-                MouseLLHookStruct mouseHookStruct = (MouseLLHookStruct) Marshal.PtrToStructure(lParam, typeof(MouseLLHookStruct));
+            if (nCode < 0) return CallNextHookEx(_mouseHookHandle, nCode, wParam, lParam);
+            //Marshall the data from callback.
+            var mouseHookStruct = (MouseLLHookStruct)Marshal.PtrToStructure(lParam, typeof(MouseLLHookStruct))!;
 
-                //detect button clicked
-                MouseButtons button = MouseButtons.None;
-                short mouseDelta = 0;
-                int clickCount = 0;
-                bool mouseDown = false;
-                bool mouseUp = false;
+            //detect button clicked
+            var button = MouseButtons.None;
+            short mouseDelta = 0;
+            var clickCount = 0;
+            var mouseDown = false;
+            var mouseUp = false;
 
-                switch (wParam)
-                {
-                    case WM_LBUTTONDOWN:
-                        mouseDown = true;
-                        button = MouseButtons.Left;
-                        clickCount = 1;
-                        break;
-                    case WM_LBUTTONUP:
-                        mouseUp = true;
-                        button = MouseButtons.Left;
-                        clickCount = 1;
-                        break;
-                    case WM_LBUTTONDBLCLK: 
-                        button = MouseButtons.Left;
-                        clickCount = 2;
-                        break;
-                    case WM_RBUTTONDOWN:
-                        mouseDown = true;
-                        button = MouseButtons.Right;
-                        clickCount = 1;
-                        break;
-                    case WM_RBUTTONUP:
-                        mouseUp = true;
-                        button = MouseButtons.Right;
-                        clickCount = 1;
-                        break;
-                    case WM_RBUTTONDBLCLK: 
-                        button = MouseButtons.Right;
-                        clickCount = 2;
-                        break;
-                    case WM_MOUSEWHEEL:
-                        //If the message is WM_MOUSEWHEEL, the high-order word of MouseData member is the wheel delta. 
-                        //One wheel click is defined as WHEEL_DELTA, which is 120. 
-                        //(value >> 16) & 0xffff; retrieves the high-order word from the given 32-bit value
-                        mouseDelta = (short)((mouseHookStruct.MouseData >> 16) & 0xffff);
-                       
-                    //TODO: X BUTTONS (I havent them so was unable to test)
-                        //If the message is WM_XBUTTONDOWN, WM_XBUTTONUP, WM_XBUTTONDBLCLK, WM_NCXBUTTONDOWN, WM_NCXBUTTONUP, 
-                        //or WM_NCXBUTTONDBLCLK, the high-order word specifies which X button was pressed or released, 
-                        //and the low-order word is reserved. This value can be one or more of the following values. 
-                        //Otherwise, MouseData is not used. 
-                        break;
-                }
+            switch (wParam) {
+                case WM_LBUTTONDOWN:
+                    mouseDown = true;
+                    button = MouseButtons.Left;
+                    clickCount = 1;
+                    break;
+                case WM_LBUTTONUP:
+                    mouseUp = true;
+                    button = MouseButtons.Left;
+                    clickCount = 1;
+                    break;
+                case WM_LBUTTONDBLCLK:
+                    button = MouseButtons.Left;
+                    clickCount = 2;
+                    break;
+                case WM_RBUTTONDOWN:
+                    mouseDown = true;
+                    button = MouseButtons.Right;
+                    clickCount = 1;
+                    break;
+                case WM_RBUTTONUP:
+                    mouseUp = true;
+                    button = MouseButtons.Right;
+                    clickCount = 1;
+                    break;
+                case WM_RBUTTONDBLCLK:
+                    button = MouseButtons.Right;
+                    clickCount = 2;
+                    break;
+                case WM_MOUSEWHEEL:
+                    //If the message is WM_MOUSEWHEEL, the high-order word of MouseData member is the wheel delta. 
+                    //One wheel click is defined as WHEEL_DELTA, which is 120. 
+                    //(value >> 16) & 0xffff; retrieves the high-order word from the given 32-bit value
+                    mouseDelta = (short)((mouseHookStruct.MouseData >> 16) & 0xffff);
 
-                //generate event 
-                MouseEventExtArgs e = new MouseEventExtArgs(
-                                                   button,
-                                                   clickCount,
-                                                   mouseHookStruct.Point.X,
-                                                   mouseHookStruct.Point.Y,
-                                                   mouseDelta);
+                    //TODO: X BUTTONS (I haven't them so was unable to test)
+                    //If the message is WM_XBUTTONDOWN, WM_XBUTTONUP, WM_XBUTTONDBLCLK, WM_NCXBUTTONDOWN, WM_NCXBUTTONUP, 
+                    //or WM_NCXBUTTONDBLCLK, the high-order word specifies which X button was pressed or released, 
+                    //and the low-order word is reserved. This value can be one or more of the following values. 
+                    //Otherwise, MouseData is not used. 
+                    break;
+            }
 
-                //If someone listens to move and there was a change in coordinates raise move event
-                
-                
-                
-                if ((s_MouseMove!=null || s_MouseMoveExt!=null) && (m_OldX != mouseHookStruct.Point.X || m_OldY != mouseHookStruct.Point.Y))
-                {
-                    m_OldX = mouseHookStruct.Point.X;
-                    m_OldY = mouseHookStruct.Point.Y;
-                    if (s_MouseMove != null)
-                    {
-                        s_MouseMove.Invoke(null, e);
-                    }
+            //generate event 
+            var e = new MouseEventExtArgs(
+                button,
+                clickCount,
+                mouseHookStruct.Point.X,
+                mouseHookStruct.Point.Y,
+                mouseDelta);
 
-                    if (s_MouseMoveExt != null)
-                    {
-                        s_MouseMoveExt.Invoke(null, e);
-                    }
-                }
-                
-                OverrideInputPoint(lParam, e, ref mouseHookStruct);
+            //If someone listens to move and there was a change in coordinates raise move event
+            if ((MouseMoveEvt != null || MouseMoveExtEvt != null) &&
+                (_mOldX != mouseHookStruct.Point.X || _mOldY != mouseHookStruct.Point.Y)) {
+                _mOldX = mouseHookStruct.Point.X;
+                _mOldY = mouseHookStruct.Point.Y;
+                MouseMoveEvt?.Invoke(null, e);
 
-                if (mouseDown) {
-                    Console.WriteLine($"Mouse down {sw.ElapsedMilliseconds} ms {e.X}:{e.Y}, handled {e.Handled}");
-                }
-                
-                //Console.WriteLine("mouseUp {0}, mouseDown {1}, moved {2}, x {3}, y {4}", mouseUp, mouseDown, (m_OldX != mouseHookStruct.Point.X || m_OldY != mouseHookStruct.Point.Y), mouseHookStruct.Point.X, mouseHookStruct.Point.Y);
-                
-                //Mouse up
-                if (s_MouseUp!=null && mouseUp)
-                {
-                    s_MouseUp.Invoke(null, e);
-                }
-                OverrideInputPoint(lParam, e, ref mouseHookStruct);
-                
-                if (mouseDown && false) { //TODO
-                    var cursor = new Cursor(Cursor.Current.Handle);
-                    Cursor.Position = new System.Drawing.Point(Cursor.Position.X /100*100, Cursor.Position.Y /100*100);
-                    Console.WriteLine("Overriding {0}:{1} to {2}:{3}", e.X, e.Y, e.X / 100 * 100, e.Y / 100 * 100);
-                    //e.Handled = true;
-                    var newEv = new MouseEventExtArgs(
-                        button,
-                        clickCount,
-                        Cursor.Position.X,
-                        Cursor.Position.Y,
-                        mouseDelta);
-                    newEv.Handled = e.Handled;
-                    newEv.OverridePoint = new Point(Cursor.Position.X, Cursor.Position.Y);
-                    e = newEv;
-                    e.Handled = true; //TODO
-                    //e.OverridePoint = new Point(e.X / 100 * 100, e.Y / 100 * 100);
-                    OverrideInputPoint(lParam, e, ref mouseHookStruct);
-                }
-                //Mouse down
-                if (s_MouseDown != null && mouseDown)
-                {
-                    s_MouseDown.Invoke(null, e);
-                }
-                OverrideInputPoint(lParam, e, ref mouseHookStruct);
-                //If someone listens to click and a click is heppened
-                if (s_MouseClick != null && clickCount>0)
-                {
-                    s_MouseClick.Invoke(null, e);
-                }
-                OverrideInputPoint(lParam, e, ref mouseHookStruct);
-                //If someone listens to click and a click is heppened
-                if (s_MouseClickExt != null && clickCount > 0)
-                {
-                    s_MouseClickExt.Invoke(null, e);
-                }
-                OverrideInputPoint(lParam, e, ref mouseHookStruct);
-                //If someone listens to double click and a click is heppened
-                if (s_MouseDoubleClick != null && clickCount == 2)
-                {
-                    s_MouseDoubleClick.Invoke(null, e);
-                }
-                OverrideInputPoint(lParam, e, ref mouseHookStruct);
-                //Wheel was moved
-                if (s_MouseWheel!=null && mouseDelta!=0)
-                {
-                    s_MouseWheel.Invoke(null, e);
-                }
-                OverrideInputPoint(lParam, e, ref mouseHookStruct);
-                if (e.Handled)
-                {
-                    sw.Stop();
-                    return -1;
-                }
+                MouseMoveExtEvt?.Invoke(null, e);
+            }
+
+            OverrideInputPoint(lParam, e, ref mouseHookStruct);
+
+            //Mouse up
+            if (MouseUpEvt != null && mouseUp) {
+                MouseUpEvt.Invoke(null, e);
+            }
+
+            OverrideInputPoint(lParam, e, ref mouseHookStruct);
+
+            //Mouse down
+            if (MouseDownEvt != null && mouseDown) {
+                MouseDownEvt.Invoke(null, e);
+            }
+
+            OverrideInputPoint(lParam, e, ref mouseHookStruct);
+            //If someone listens to click and a click is happened
+            if (MouseClickEvt != null && clickCount > 0) {
+                MouseClickEvt.Invoke(null, e);
+            }
+
+            OverrideInputPoint(lParam, e, ref mouseHookStruct);
+            //If someone listens to click and a click is happened
+            if (MouseClickExtEvt != null && clickCount > 0) {
+                MouseClickExtEvt.Invoke(null, e);
+            }
+
+            OverrideInputPoint(lParam, e, ref mouseHookStruct);
+            //If someone listens to double click and a click is happened
+            if (MouseDoubleClickEvt != null && clickCount == 2) {
+                MouseDoubleClickEvt.Invoke(null, e);
+            }
+
+            OverrideInputPoint(lParam, e, ref mouseHookStruct);
+            //Wheel was moved
+            if (MouseWheelEvt != null && mouseDelta != 0) {
+                MouseWheelEvt.Invoke(null, e);
+            }
+
+            OverrideInputPoint(lParam, e, ref mouseHookStruct);
+            if (e.Handled) {
+                return -1;
             }
 
             //call next hook
-            var mouseLlHookStruct = (MouseLLHookStruct)Marshal.PtrToStructure(lParam, typeof(MouseLLHookStruct));
-            //Console.WriteLine("CALL NEXT HOOK {0}:{1}", mouseLlHookStruct.Point.X, mouseLlHookStruct.Point.Y);
-            
-            sw.Stop();
-            //Console.WriteLine("Mouse hook finish {0} ms", sw.ElapsedMilliseconds);
-            //return 0;
-            return CallNextHookEx(s_MouseHookHandle, nCode, wParam, lParam);
+            return CallNextHookEx(_mouseHookHandle, nCode, wParam, lParam);
         }
 
-        private static void OverrideInputPoint(IntPtr lParam, MouseEventExtArgs e, ref MouseLLHookStruct mouseHookStruct) {
+        private static void OverrideInputPoint(IntPtr lParam, MouseEventExtArgs e,
+            ref MouseLLHookStruct mouseHookStruct) {
             if (e.OverridePoint == null) return;
-            
+
             Console.Write("Old lParam {0} ", lParam);
             mouseHookStruct.Point = e.OverridePoint.Value;
             e.OverridePoint = null;
@@ -260,76 +213,64 @@ namespace InputHooks
             Console.WriteLine("New lParam {0}", lParam);
         }
 
-        private static void EnsureSubscribedToGlobalMouseEvents()
-        {
+        private static void EnsureSubscribedToGlobalMouseEvents() {
             // install Mouse hook only if it is not installed and must be installed
             Console.WriteLine("HOOK ENSURING");
-            if (s_MouseHookHandle == 0)
-            {
-                //See comment of this field. To avoid GC to clean it up.
-                //s_MouseDelegate = (code, param, lParam) => -1;
-                s_MouseDelegate = MouseHookProc;
-                //install hook
-                s_MouseHookHandle = SetWindowsHookEx(
-                    UseGlobal ? WH_MOUSE_LL : WH_MOUSE, //TODO
-                    //WH_MOUSE,
-                    s_MouseDelegate,
-                    Marshal.GetHINSTANCE(
-                        Assembly.GetExecutingAssembly().GetModules()[0]),
-                    0);
-                //If SetWindowsHookEx fails.
-                if (s_MouseHookHandle == 0)
-                {
-                    //Returns the error code returned by the last unmanaged function called using platform invoke that has the DllImportAttribute.SetLastError flag set. 
-                    int errorCode = Marshal.GetLastWin32Error();
-                    Console.WriteLine("ERROR {0}", errorCode);
-                    //do cleanup
+            if (_mouseHookHandle != 0) return;
+            //See comment of this field. To avoid GC to clean it up.
+            _mouseDelegate = MouseHookProc;
+            //install hook
+            _mouseHookHandle = SetWindowsHookEx(
+                UseGlobal ? WH_MOUSE_LL : WH_MOUSE,
+                _mouseDelegate,
+                Marshal.GetHINSTANCE(
+                    Assembly.GetExecutingAssembly().GetModules()[0]),
+                0);
+            //If SetWindowsHookEx fails.
+            if (_mouseHookHandle != 0) return;
+            //Returns the error code returned by the last unmanaged function called using platform invoke that has the DllImportAttribute.SetLastError flag set. 
+            var errorCode = Marshal.GetLastWin32Error();
+            Console.WriteLine("ERROR {0}", errorCode);
+            //do cleanup
 
-                    //Initializes and throws a new instance of the Win32Exception class with the specified error. 
-                    throw new Win32Exception(errorCode); 
-                }
+            //Initializes and throws a new instance of the Win32Exception class with the specified error. 
+            throw new Win32Exception(errorCode);
+        }
+
+        private static void TryUnsubscribeFromGlobalMouseEvents() {
+            //if no subscribers are registered unsubscribe from hook
+            if (MouseClickEvt == null &&
+                MouseDownEvt == null &&
+                MouseMoveEvt == null &&
+                MouseUpEvt == null &&
+                MouseClickExtEvt == null &&
+                MouseMoveExtEvt == null &&
+                MouseWheelEvt == null) {
+                ForceUnsubscribeFromGlobalMouseEvents();
             }
         }
 
-        private static void TryUnsubscribeFromGlobalMouseEvents()
-        {
-            //if no subsribers are registered unsubsribe from hook
-            if (s_MouseClick == null &&
-                s_MouseDown == null &&
-                s_MouseMove == null &&
-                s_MouseUp == null &&
-                s_MouseClickExt == null &&
-                s_MouseMoveExt == null &&
-                s_MouseWheel == null)
-            {
-                ForceUnsunscribeFromGlobalMouseEvents();
+        private static void ForceUnsubscribeFromGlobalMouseEvents() {
+            if (_mouseHookHandle == 0) return;
+            //uninstall hook
+            var result = UnhookWindowsHookEx(_mouseHookHandle);
+            //reset invalid handle
+            _mouseHookHandle = 0;
+            //Free up for GC
+            _mouseDelegate = null;
+            //if failed and exception must be thrown
+            if (result == 0) {
+                //Returns the error code returned by the last unmanaged function called using platform invoke that has the DllImportAttribute.SetLastError flag set. 
+                var errorCode = Marshal.GetLastWin32Error();
+                //Initializes and throws a new instance of the Win32Exception class with the specified error. 
+                throw new Win32Exception(errorCode);
             }
         }
 
-        private static void ForceUnsunscribeFromGlobalMouseEvents()
-        {
-            if (s_MouseHookHandle != 0)
-            {
-                //uninstall hook
-                int result = UnhookWindowsHookEx(s_MouseHookHandle);
-                //reset invalid handle
-                s_MouseHookHandle = 0;
-                //Free up for GC
-                s_MouseDelegate = null;
-                //if failed and exception must be thrown
-                if (result == 0)
-                {
-                    //Returns the error code returned by the last unmanaged function called using platform invoke that has the DllImportAttribute.SetLastError flag set. 
-                    int errorCode = Marshal.GetLastWin32Error();
-                    //Initializes and throws a new instance of the Win32Exception class with the specified error. 
-                    throw new Win32Exception(errorCode);
-                }
-            }
-        }
-        
         #endregion
 
         //##############################################################################
+
         #region Keyboard hook processing
 
         /// <summary>
@@ -338,12 +279,12 @@ namespace InputHooks
         /// When passing delegates to unmanaged code, they must be kept alive by the managed application 
         /// until it is guaranteed that they will never be called.
         /// </summary>
-        private static HookProc s_KeyboardDelegate;
+        private static HookProc _keyboardDelegate;
 
         /// <summary>
         /// Stores the handle to the Keyboard hook procedure.
         /// </summary>
-        private static int s_KeyboardHookHandle;
+        private static int _keyboardHookHandle;
 
         public static bool UseGlobal { get; set; }
 
@@ -371,132 +312,113 @@ namespace InputHooks
         /// hooks will not receive hook notifications and may behave incorrectly as a result. If the hook 
         /// procedure does not call CallNextHookEx, the return value should be zero. 
         /// </returns>
-        private static int KeyboardHookProc(int nCode, Int32 wParam, IntPtr lParam)
-        {
-            //indicates if any of underlaing events set e.Handled flag
-            var sw = new Stopwatch();
-            sw.Start();
-            bool handled = false;
+        private static int KeyboardHookProc(int nCode, int wParam, IntPtr lParam) {
+            //indicates if any of underlying events set e.Handled flag
 
-            if (nCode >= 0)
-            {
+            var handled = false;
+
+            if (nCode >= 0) {
                 //read structure KeyboardHookStruct at lParam
-                KeyboardHookStruct MyKeyboardHookStruct = (KeyboardHookStruct)Marshal.PtrToStructure(lParam, typeof(KeyboardHookStruct));
+                var myKeyboardHookStruct =
+                    (KeyboardHookStruct)Marshal.PtrToStructure(lParam, typeof(KeyboardHookStruct))!;
                 //raise KeyDown
-                if (s_KeyDown != null && (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN))
-                {
-                    Keys keyData = (Keys)MyKeyboardHookStruct.VirtualKeyCode;
-                    KeyEventArgs e = new KeyEventArgs(keyData);
-                    s_KeyDown.Invoke(null, e);
+                if (KeyDownEvt != null && (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN)) {
+                    var keyData = (Keys)myKeyboardHookStruct.VirtualKeyCode;
+                    var e = new KeyEventArgs(keyData);
+                    KeyDownEvt.Invoke(null, e);
                     handled = e.Handled;
                 }
 
                 // raise KeyPress
-                if (s_KeyPress != null && wParam == WM_KEYDOWN)
-                {
-                    bool isDownShift = ((GetKeyState(VK_SHIFT) & 0x80) == 0x80 ? true : false);
-                    bool isDownCapslock = (GetKeyState(VK_CAPITAL) != 0 ? true : false);
+                if (KeyPressEvt != null && wParam == WM_KEYDOWN) {
+                    var isDownShift = ((GetKeyState(VK_SHIFT) & 0x80) == 0x80);
+                    var isDownCapslock = (GetKeyState(VK_CAPITAL) != 0);
 
-                    byte[] keyState = new byte[256];
-                    GetKeyboardState(keyState);
-                    byte[] inBuffer = new byte[2];
-                    if (ToAscii(MyKeyboardHookStruct.VirtualKeyCode,
-                              MyKeyboardHookStruct.ScanCode,
-                              keyState,
-                              inBuffer,
-                              MyKeyboardHookStruct.Flags) == 1)
-                    {
-                        char key = (char)inBuffer[0];
-                        if ((isDownCapslock ^ isDownShift) && Char.IsLetter(key)) key = Char.ToUpper(key);
-                        KeyPressEventArgs e = new KeyPressEventArgs(key);
-                        s_KeyPress.Invoke(null, e);
+                    var keyState = new byte[256];
+                    _ = GetKeyboardState(keyState);
+                    var inBuffer = new byte[2];
+                    if (ToAscii(myKeyboardHookStruct.VirtualKeyCode,
+                            myKeyboardHookStruct.ScanCode,
+                            keyState,
+                            inBuffer,
+                            myKeyboardHookStruct.Flags) == 1) {
+                        var key = (char)inBuffer[0];
+                        if (isDownCapslock ^ isDownShift && char.IsLetter(key)) key = char.ToUpper(key);
+                        var e = new KeyPressEventArgs(key);
+                        KeyPressEvt.Invoke(null, e);
                         handled = handled || e.Handled;
                     }
                 }
 
                 // raise KeyUp
-                if (s_KeyUp != null && (wParam == WM_KEYUP || wParam == WM_SYSKEYUP))
-                {
-                    Keys keyData = (Keys)MyKeyboardHookStruct.VirtualKeyCode;
-                    KeyEventArgs e = new KeyEventArgs(keyData);
-                    s_KeyUp.Invoke(null, e);
+                if (KeyUpEvt != null && wParam is WM_KEYUP or WM_SYSKEYUP) {
+                    var keyData = (Keys)myKeyboardHookStruct.VirtualKeyCode;
+                    var e = new KeyEventArgs(keyData);
+                    KeyUpEvt.Invoke(null, e);
                     handled = handled || e.Handled;
                 }
-
             }
-            
-            Console.WriteLine("Keyboard hook {0} ms", sw.ElapsedMilliseconds);
-            sw.Stop();
 
             //if event handled in application do not handoff to other listeners
             if (handled)
                 return -1;
 
             //forward to other application
-            return CallNextHookEx(s_KeyboardHookHandle, nCode, wParam, lParam);
+            return CallNextHookEx(_keyboardHookHandle, nCode, wParam, lParam);
         }
 
-        private static void EnsureSubscribedToGlobalKeyboardEvents()
-        {
+        private static void EnsureSubscribedToGlobalKeyboardEvents() {
             // install Keyboard hook only if it is not installed and must be installed
-            if (s_KeyboardHookHandle == 0)
-            {
-                //See comment of this field. To avoid GC to clean it up.
-                s_KeyboardDelegate = KeyboardHookProc;
-                //install hook
-                s_KeyboardHookHandle = SetWindowsHookEx(
-                    UseGlobal ? WH_KEYBOARD_LL : WH_KEYBOARD, //TODO
-                    //WH_KEYBOARD,
-                    s_KeyboardDelegate,
-                    Marshal.GetHINSTANCE(
-                        Assembly.GetExecutingAssembly().GetModules()[0]),
-                    0);
-                //If SetWindowsHookEx fails.
-                if (s_KeyboardHookHandle == 0)
-                {
-                    //Returns the error code returned by the last unmanaged function called using platform invoke that has the DllImportAttribute.SetLastError flag set. 
-                    int errorCode = Marshal.GetLastWin32Error();
-                    //do cleanup
+            if (_keyboardHookHandle != 0) return;
 
-                    //Initializes and throws a new instance of the Win32Exception class with the specified error. 
-                    throw new Win32Exception(errorCode);
-                }
+            //See comment of this field. To avoid GC to clean it up.
+            _keyboardDelegate = KeyboardHookProc;
+            //install hook
+            _keyboardHookHandle = SetWindowsHookEx(
+                UseGlobal ? WH_KEYBOARD_LL : WH_KEYBOARD,
+                //WH_KEYBOARD,
+                _keyboardDelegate,
+                Marshal.GetHINSTANCE(
+                    Assembly.GetExecutingAssembly().GetModules()[0]),
+                0);
+            //If SetWindowsHookEx fails.
+            if (_keyboardHookHandle != 0) return;
+
+            //Returns the error code returned by the last unmanaged function called using platform invoke that has the DllImportAttribute.SetLastError flag set. 
+            var errorCode = Marshal.GetLastWin32Error();
+            //do cleanup
+
+            //Initializes and throws a new instance of the Win32Exception class with the specified error. 
+            throw new Win32Exception(errorCode);
+        }
+
+        private static void TryUnsubscribeFromGlobalKeyboardEvents() {
+            //if no subscribers are registered unsubscribe from hook
+            if (KeyDownEvt == null &&
+                KeyUpEvt == null &&
+                KeyPressEvt == null) {
+                ForceUnsubscribeFromGlobalKeyboardEvents();
             }
         }
 
-        private static void TryUnsubscribeFromGlobalKeyboardEvents()
-        {
-            //if no subsribers are registered unsubsribe from hook
-            if (s_KeyDown == null &&
-                s_KeyUp == null &&
-                s_KeyPress == null)
-            {
-                ForceUnsunscribeFromGlobalKeyboardEvents();
-            }
-        }
+        private static void ForceUnsubscribeFromGlobalKeyboardEvents() {
+            if (_keyboardHookHandle == 0) return;
 
-        private static void ForceUnsunscribeFromGlobalKeyboardEvents()
-        {
-            if (s_KeyboardHookHandle != 0)
-            {
-                //uninstall hook
-                int result = UnhookWindowsHookEx(s_KeyboardHookHandle);
-                //reset invalid handle
-                s_KeyboardHookHandle = 0;
-                //Free up for GC
-                s_KeyboardDelegate = null;
-                //if failed and exception must be thrown
-                if (result == 0)
-                {
-                    //Returns the error code returned by the last unmanaged function called using platform invoke that has the DllImportAttribute.SetLastError flag set. 
-                    int errorCode = Marshal.GetLastWin32Error();
-                    //Initializes and throws a new instance of the Win32Exception class with the specified error. 
-                    throw new Win32Exception(errorCode);
-                }
+            //uninstall hook
+            var result = UnhookWindowsHookEx(_keyboardHookHandle);
+            //reset invalid handle
+            _keyboardHookHandle = 0;
+            //Free up for GC
+            _keyboardDelegate = null;
+            //if failed and exception must be thrown
+            if (result == 0) {
+                //Returns the error code returned by the last unmanaged function called using platform invoke that has the DllImportAttribute.SetLastError flag set. 
+                var errorCode = Marshal.GetLastWin32Error();
+                //Initializes and throws a new instance of the Win32Exception class with the specified error. 
+                throw new Win32Exception(errorCode);
             }
         }
 
         #endregion
-
     }
 }

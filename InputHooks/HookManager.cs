@@ -12,7 +12,7 @@ namespace InputHooks {
         //################################################################
         #region Mouse events
 
-        private static event MouseEventHandler s_MouseMove;
+        private static event MouseEventHandler MouseMoveEvt;
 
         /// <summary>
         /// Occurs when the mouse pointer is moved. 
@@ -22,17 +22,17 @@ namespace InputHooks {
             add
             {
                 EnsureSubscribedToGlobalMouseEvents();
-                s_MouseMove += value;
+                MouseMoveEvt += value;
             }
 
             remove
             {
-                s_MouseMove -= value;
+                MouseMoveEvt -= value;
                 TryUnsubscribeFromGlobalMouseEvents();
             }
         }
 
-        private static event EventHandler<MouseEventExtArgs> s_MouseMoveExt;
+        private static event EventHandler<MouseEventExtArgs> MouseMoveExtEvt;
 
         /// <summary>
         /// Occurs when the mouse pointer is moved. 
@@ -46,18 +46,18 @@ namespace InputHooks {
             add
             {
                 EnsureSubscribedToGlobalMouseEvents();
-                s_MouseMoveExt += value;
+                MouseMoveExtEvt += value;
             }
 
             remove
             {
 
-                s_MouseMoveExt -= value;
+                MouseMoveExtEvt -= value;
                 TryUnsubscribeFromGlobalMouseEvents();
             }
         }
 
-        private static event MouseEventHandler s_MouseClick;
+        private static event MouseEventHandler MouseClickEvt;
 
         /// <summary>
         /// Occurs when a click was performed by the mouse. 
@@ -67,16 +67,16 @@ namespace InputHooks {
             add
             {
                 EnsureSubscribedToGlobalMouseEvents();
-                s_MouseClick += value;
+                MouseClickEvt += value;
             }
             remove
             {
-                s_MouseClick -= value;
+                MouseClickEvt -= value;
                 TryUnsubscribeFromGlobalMouseEvents();
             }
         }
 
-        private static event EventHandler<MouseEventExtArgs> s_MouseClickExt;
+        private static event EventHandler<MouseEventExtArgs> MouseClickExtEvt;
 
         /// <summary>
         /// Occurs when a click was performed by the mouse. 
@@ -90,16 +90,16 @@ namespace InputHooks {
             add
             {
                 EnsureSubscribedToGlobalMouseEvents();
-                s_MouseClickExt += value;
+                MouseClickExtEvt += value;
             }
             remove
             {
-                s_MouseClickExt -= value;
+                MouseClickExtEvt -= value;
                 TryUnsubscribeFromGlobalMouseEvents();
             }
         }
 
-        private static event MouseEventHandler s_MouseDown;
+        private static event MouseEventHandler MouseDownEvt;
 
         /// <summary>
         /// Occurs when the mouse a mouse button is pressed. 
@@ -109,16 +109,16 @@ namespace InputHooks {
             add 
             { 
                 EnsureSubscribedToGlobalMouseEvents();
-                s_MouseDown += value;
+                MouseDownEvt += value;
             }
             remove
             {
-                s_MouseDown -= value;
+                MouseDownEvt -= value;
                 TryUnsubscribeFromGlobalMouseEvents();
             }
         }
 
-        private static event MouseEventHandler s_MouseUp;
+        private static event MouseEventHandler MouseUpEvt;
 
         /// <summary>
         /// Occurs when a mouse button is released. 
@@ -128,16 +128,16 @@ namespace InputHooks {
             add
             {
                 EnsureSubscribedToGlobalMouseEvents();
-                s_MouseUp += value;
+                MouseUpEvt += value;
             }
             remove
             {
-                s_MouseUp -= value;
+                MouseUpEvt -= value;
                 TryUnsubscribeFromGlobalMouseEvents();
             }
         }
 
-        private static event MouseEventHandler s_MouseWheel;
+        private static event MouseEventHandler MouseWheelEvt;
 
         /// <summary>
         /// Occurs when the mouse wheel moves. 
@@ -147,17 +147,17 @@ namespace InputHooks {
             add
             {
                 EnsureSubscribedToGlobalMouseEvents();
-                s_MouseWheel += value;
+                MouseWheelEvt += value;
             }
             remove
             {
-                s_MouseWheel -= value;
+                MouseWheelEvt -= value;
                 TryUnsubscribeFromGlobalMouseEvents();
             }
         }
 
 
-        private static event MouseEventHandler s_MouseDoubleClick;
+        private static event MouseEventHandler MouseDoubleClickEvt;
 
         //The double click event will not be provided directly from hook.
         //To fire the double click event wee need to monitor mouse up event and when it occures 
@@ -172,10 +172,10 @@ namespace InputHooks {
             add
             {
                 EnsureSubscribedToGlobalMouseEvents();
-                if (s_MouseDoubleClick == null)
+                if (MouseDoubleClickEvt == null)
                 {
                     //We create a timer to monitor interval between two clicks
-                    s_DoubleClickTimer = new Timer
+                    _doubleClickTimer = new Timer
                     {
                         //This interval will be set to the value we retrive from windows. This is a windows setting from contro planel.
                         Interval = GetDoubleClickTime(),
@@ -183,24 +183,24 @@ namespace InputHooks {
                         Enabled = false
                     };
                     //We define the callback function for the timer
-                    s_DoubleClickTimer.Tick += DoubleClickTimeElapsed;
+                    _doubleClickTimer.Tick += DoubleClickTimeElapsed;
                     //We start to monitor mouse up event.
                     MouseUp += OnMouseUp;
                 }
-                s_MouseDoubleClick += value;
+                MouseDoubleClickEvt += value;
             }
             remove
             {
-                if (s_MouseDoubleClick != null)
+                if (MouseDoubleClickEvt != null)
                 {
-                    s_MouseDoubleClick -= value;
-                    if (s_MouseDoubleClick == null)
+                    MouseDoubleClickEvt -= value;
+                    if (MouseDoubleClickEvt == null)
                     {
                         //Stop monitoring mouse up
                         MouseUp -= OnMouseUp;
                         //Dispose the timer
-                        s_DoubleClickTimer.Tick -= DoubleClickTimeElapsed;
-                        s_DoubleClickTimer = null;
+                        _doubleClickTimer.Tick -= DoubleClickTimeElapsed;
+                        _doubleClickTimer = null;
                     }
                 }
                 TryUnsubscribeFromGlobalMouseEvents();
@@ -208,15 +208,15 @@ namespace InputHooks {
         }
 
         //This field remembers mouse button pressed because in addition to the short interval it must be also the same button.
-        private static MouseButtons s_PrevClickedButton;
+        private static MouseButtons _prevClickedButton;
         //The timer to monitor time interval between two clicks.
-        private static Timer s_DoubleClickTimer;
+        private static Timer _doubleClickTimer;
 
         private static void DoubleClickTimeElapsed(object sender, EventArgs e)
         {
-            //Timer is alapsed and no second click ocuured
-            s_DoubleClickTimer.Enabled = false;
-            s_PrevClickedButton = MouseButtons.None;
+            //Timer is elapsed and no second click occured
+            _doubleClickTimer.Enabled = false;
+            _prevClickedButton = MouseButtons.None;
         }
 
         /// <summary>
@@ -230,22 +230,22 @@ namespace InputHooks {
             //This should not heppen
             if (e.Clicks < 1) { return;}
             //If the secon click heppened on the same button
-            if (e.Button.Equals(s_PrevClickedButton))
+            if (e.Button.Equals(_prevClickedButton))
             {
-                if (s_MouseDoubleClick!=null)
+                if (MouseDoubleClickEvt!=null)
                 {
                     //Fire double click
-                    s_MouseDoubleClick.Invoke(null, e);
+                    MouseDoubleClickEvt.Invoke(null, e);
                 }
                 //Stop timer
-                s_DoubleClickTimer.Enabled = false;
-                s_PrevClickedButton = MouseButtons.None;
+                _doubleClickTimer.Enabled = false;
+                _prevClickedButton = MouseButtons.None;
             }
             else
             {
                 //If it was the firts click start the timer
-                s_DoubleClickTimer.Enabled = true;
-                s_PrevClickedButton = e.Button;
+                _doubleClickTimer.Enabled = true;
+                _prevClickedButton = e.Button;
             }
         }
         #endregion
@@ -253,7 +253,7 @@ namespace InputHooks {
         //################################################################
         #region Keyboard events
 
-        private static event KeyPressEventHandler s_KeyPress;
+        private static event KeyPressEventHandler KeyPressEvt;
 
         /// <summary>
         /// Occurs when a key is pressed.
@@ -275,16 +275,16 @@ namespace InputHooks {
             add
             {
                 EnsureSubscribedToGlobalKeyboardEvents();
-                s_KeyPress += value;
+                KeyPressEvt += value;
             }
             remove
             {
-                s_KeyPress -= value;
+                KeyPressEvt -= value;
                 TryUnsubscribeFromGlobalKeyboardEvents();
             }
         }
 
-        private static event KeyEventHandler s_KeyUp;
+        private static event KeyEventHandler KeyUpEvt;
 
         /// <summary>
         /// Occurs when a key is released. 
@@ -294,30 +294,30 @@ namespace InputHooks {
             add
             {
                 EnsureSubscribedToGlobalKeyboardEvents();
-                s_KeyUp += value;
+                KeyUpEvt += value;
             }
             remove
             {
-                s_KeyUp -= value;
+                KeyUpEvt -= value;
                 TryUnsubscribeFromGlobalKeyboardEvents();
             }
         }
 
-        private static event KeyEventHandler s_KeyDown;
+        private static event KeyEventHandler KeyDownEvt;
 
         /// <summary>
-        /// Occurs when a key is preseed. 
+        /// Occurs when a key is pressed. 
         /// </summary>
         public static event KeyEventHandler KeyDown
         {
             add
             {
                 EnsureSubscribedToGlobalKeyboardEvents();
-                s_KeyDown += value;
+                KeyDownEvt += value;
             }
             remove
             {
-                s_KeyDown -= value;
+                KeyDownEvt -= value;
                 TryUnsubscribeFromGlobalKeyboardEvents();
             }
         }
