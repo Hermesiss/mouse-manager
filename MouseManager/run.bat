@@ -1,1 +1,1 @@
-start /min MouseManager.exe -w 1120 -h 680 -l 400 -t 200
+start /min MouseManager.exe -w 1120 -h 680 -l 400 -t 200 --mh=true --mv=false

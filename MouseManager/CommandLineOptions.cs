@@ -11,5 +11,11 @@ namespace MouseManager {
         public uint Top { get; set; }
         [Option(shortName: 'l', longName: "left", Required = false, HelpText = "Distance from left", Default = 0U)]
         public uint Left { get; set; }
+        
+        [Option(longName: "mv", Required = false, HelpText = "Distance from left", Default = false)]
+        public bool MirrorVertical { get; set; }
+        
+        [Option(longName: "mh", Required = false, HelpText = "Distance from left", Default = false)]
+        public bool MirrorHorizontal { get; set; }
     }
 }

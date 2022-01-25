@@ -8,13 +8,15 @@ using WinApi;
 
 namespace MouseManager {
     public class EventHandling {
-        public EventHandling(bool useGlobal, uint width, uint height, uint left = 0, uint top = 0) {
+        public EventHandling(bool useGlobal, uint width, uint height, uint left = 0, uint top = 0, bool mirrorHor = false, bool mirrorVert = false) {
             _useGlobal = useGlobal;
             _left = left;
             _top = top;
             _width = width;
             _height = height;
             _screen = Api.GetScreenSize();
+            _mirrorHor = mirrorHor;
+            _mirrorVert = mirrorVert;
             HookManager.UseGlobal = useGlobal;
         }
 
@@ -22,6 +24,7 @@ namespace MouseManager {
         private readonly bool _useGlobal;
 
         private readonly uint _height, _width, _top, _left;
+        private readonly bool _mirrorHor, _mirrorVert;
         private readonly (int x, int y) _screen;
 
 
@@ -232,8 +235,17 @@ namespace MouseManager {
                 //_manualClick = true;
                 ((MouseEventExtArgs)e).Handled = true;
                 //var cursor = new Cursor(Cursor.Current.Handle);
-                var newX = (int)(_left + (Cursor.Position.X / (float)_screen.x) * _width);
-                var newY = (int)(_top + (Cursor.Position.Y / (float)_screen.y) * _height);
+                var positionX = (Cursor.Position.X / (float)_screen.x);
+                var positionY = Cursor.Position.Y / (float)_screen.y;
+                if (_mirrorVert) {
+                    positionY = 1 - positionY;
+                }
+
+                if (_mirrorHor) {
+                    positionX = 1 - positionX;
+                }
+                var newX = (int)(_left + positionX * _width);
+                var newY = (int)(_top + positionY * _height);
                 Cursor.Position = new Point(newX, newY);
                 //DoMouseClick((uint)Cursor.Position.X / 100 * 100, (uint)Cursor.Position.Y / 100 * 100);
                 _ = DoMouseClick(newX, newY);
